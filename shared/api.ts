@@ -25,6 +25,7 @@ export interface Proof {
   proof: string;
   nullifier: string;
   option: OptionId;
+  tokenHash?: string;
 }
 
 export interface Results {
