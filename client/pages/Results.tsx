@@ -79,6 +79,8 @@ export default function ResultsPage() {
               )}
             </div>
 
+            {data && <RegionHeat data={data} />}
+
             <div className="mt-10 text-xs text-muted-foreground">
               Regional breakdown updates every few seconds based on anonymous tallies.
             </div>
