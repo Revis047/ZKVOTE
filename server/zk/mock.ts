@@ -41,7 +41,6 @@ export interface Results {
 const regionList: Region[] = ["NA", "SA", "EU", "AF", "AS", "OC"];
 
 // In-memory stores (ephemeral, for demo)
-const issued: Map<string, Credential> = new Map();
 const pollNullifiers: Map<string, Set<string>> = new Map();
 const pollTallies: Map<string, Record<OptionId, number>> = new Map();
 const pollRegionTallies: Map<string, Record<Region, Record<OptionId, number>>> = new Map();
@@ -85,38 +84,38 @@ export function issueCredential(region?: Region): Credential {
     region: region ?? regionList[Math.floor(Math.random() * regionList.length)],
     issuedAt: Date.now(),
   };
-  issued.set(token, cred);
+  // Stateless: do not store issued credentials server-side
   return cred;
 }
 
 export function nullifierFromToken(token: string) {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
-
-export function generateProof(req: ProofRequest): Proof {
-  if (!issued.has(req.token)) {
-    throw new Error("Unknown credential");
-  }
-  const nullifier = nullifierFromToken(req.token);
-  const material = `${req.token}:${req.option}:${nullifier}`;
-  const proof = crypto.createHash("sha512").update(material).digest("hex");
-  return { proof, nullifier, option: req.option };
+export function tokenHash(token: string) {
+  return crypto.createHash("sha256").update(`h:${token}`).digest("hex");
 }
 
-export function verifyProof(p: Proof): { valid: true } | { valid: false; reason: string } {
-  // Proof must be correctly formed for some issued token
-  const token = [...issued.values()].find((c) => nullifierFromToken(c.token) === p.nullifier)?.token;
-  if (!token) return { valid: false, reason: "Nullifier not recognized" };
-  // recompute proof
+export function generateProof(req: ProofRequest): Proof {
+  // Stateless proof: computed directly from the token; no server-side issuance lookup
+  const nullifier = nullifierFromToken(req.token);
+  const tHash = tokenHash(req.token);
+  const material = `${tHash}:${req.option}:${nullifier}`;
+  const proof = crypto.createHash("sha512").update(material).digest("hex");
+  return { proof, nullifier, option: req.option, tokenHash: tHash } as Proof & { tokenHash: string };
+}
+
+export function verifyProof(p: Proof & { tokenHash?: string }): { valid: true } | { valid: false; reason: string } {
+  // recompute from provided tokenHash and nullifier
+  if (!p || !(p as any).tokenHash) return { valid: false, reason: "Missing token hash" };
   const expected = crypto
     .createHash("sha512")
-    .update(`${token}:${p.option}:${p.nullifier}`)
+    .update(`${(p as any).tokenHash}:${p.option}:${p.nullifier}`)
     .digest("hex");
   if (expected !== p.proof) return { valid: false, reason: "Invalid proof" };
   return { valid: true };
 }
 
-export function recordVote(pollId: string, p: Proof) {
+export function recordVote(pollId: string, p: Proof & { region: Region }) {
   const poll = pollTallies.get(pollId);
   const regions = pollRegionTallies.get(pollId);
   const nulls = pollNullifiers.get(pollId);
@@ -124,11 +123,9 @@ export function recordVote(pollId: string, p: Proof) {
   if (nulls.has(p.nullifier)) {
     throw new Error("Nullifier already used");
   }
-  const holder = [...issued.values()].find((c) => nullifierFromToken(c.token) === p.nullifier);
-  if (!holder) throw new Error("No credential for nullifier");
   nulls.add(p.nullifier);
   poll[p.option] += 1;
-  regions[holder.region][p.option] += 1;
+  regions[p.region][p.option] += 1;
 }
 
 export function getResults(pollId?: string): Results {
@@ -145,7 +142,6 @@ export function getResults(pollId?: string): Results {
 }
 
 export function resetAll() {
-  issued.clear();
   pollNullifiers.clear();
   pollTallies.clear();
   pollRegionTallies.clear();
