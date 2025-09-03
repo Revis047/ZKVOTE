@@ -5,26 +5,36 @@ export function apiBases() {
   if (typeof window !== "undefined") {
     const h = window.location.hostname;
     if (h.endsWith("netlify.app")) {
-      // On Netlify prod, hit functions directly to avoid redirect/proxy quirks
       return [netlify, prod];
     }
   }
-  // Prefer same-origin /api in dev or Builder preview; fall back to functions
   return [local, netlify, prod];
 }
 
 export async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   const bases = apiBases();
-  const errors: any[] = [];
+  let lastErr: any;
   for (const base of bases) {
     try {
       const res = await fetch(`${base}${path}`, init);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      // If we get a response, do not try other bases
+      if (!res.ok) {
+        let msg = "";
+        try {
+          const data = await res.json();
+          msg = (data as any)?.error || "";
+        } catch {}
+        throw new Error(msg || `HTTP ${res.status}`);
+      }
       return (await res.json()) as T;
-    } catch (e) {
-      errors.push(e);
-      continue;
+    } catch (e: any) {
+      lastErr = e;
+      // Only try next base on network errors (e.g., Failed to fetch)
+      if (typeof e?.message === "string" && /failed to fetch|network/i.test(e.message)) {
+        continue;
+      }
+      break;
     }
   }
-  throw errors[errors.length - 1] ?? new Error("Network error");
+  throw lastErr ?? new Error("Network error");
 }
