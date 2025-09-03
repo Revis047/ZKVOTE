@@ -1,8 +1,15 @@
 export function apiBases() {
-  const local = "/api";
   const netlify = "/.netlify/functions/api";
+  const local = "/api";
   const prod = "https://zkvote.netlify.app/.netlify/functions/api";
-  // Prefer same-origin routes in dev; fall back to Netlify prod if needed
+  if (typeof window !== "undefined") {
+    const h = window.location.hostname;
+    if (h.endsWith("netlify.app")) {
+      // On Netlify prod, hit functions directly to avoid redirect/proxy quirks
+      return [netlify, prod];
+    }
+  }
+  // Prefer same-origin /api in dev or Builder preview; fall back to functions
   return [local, netlify, prod];
 }
 
