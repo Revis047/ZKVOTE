@@ -32,3 +32,8 @@ export interface Results {
   regions: Record<Region, Record<OptionId, number>>;
   totalVotes: number;
 }
+
+export interface PollInfo {
+  id: string;
+  endsAt: number; // ms epoch
+}
