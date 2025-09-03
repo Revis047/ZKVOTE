@@ -40,7 +40,7 @@ export default function ResultsPage() {
       if (mounted) setData(json);
     }
     fetchData();
-    const id = setInterval(fetchData, 2500);
+    const id = setInterval(fetchData, 1000);
     return () => {
       mounted = false;
       clearInterval(id);
