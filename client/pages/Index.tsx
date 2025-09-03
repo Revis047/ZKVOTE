@@ -26,6 +26,7 @@ export default function Index() {
   const [credential, setCredential] = useState<Credential | null>(null);
   const [selected, setSelected] = useState<OptionId | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [alreadyOpen, setAlreadyOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
