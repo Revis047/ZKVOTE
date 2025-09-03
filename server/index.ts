@@ -20,12 +20,21 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
 
-  // ZK mock endpoints
+  // ZK mock endpoints (support both with and without /api prefix for Netlify mapping)
   app.get("/api/poll", getPoll);
+  app.get("/poll", getPoll);
+
   app.post("/api/credential", postCredential);
+  app.post("/credential", postCredential);
+
   app.post("/api/prove", postProve);
+  app.post("/prove", postProve);
+
   app.post("/api/vote", postVote);
+  app.post("/vote", postVote);
+
   app.get("/api/results", getVotes);
+  app.get("/results", getVotes);
 
   return app;
 }
