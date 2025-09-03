@@ -51,8 +51,7 @@ export default function Index() {
 
   async function ensureCredential() {
     if (credential) return credential;
-    const res = await fetch("/api/credential", { method: "POST" });
-    const cred = (await res.json()) as Credential;
+    const cred = await fetchJson<Credential>("/credential", { method: "POST" });
     setCredential(cred);
     localStorage.setItem("zkvote-credential", JSON.stringify(cred));
     return cred;
