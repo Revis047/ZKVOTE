@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useEffect, useMemo, useState } from "react";
-import type { Credential, OptionId, Proof } from "@shared/api";
+import type { Credential, OptionId, Proof, PollInfo } from "@shared/api";
 
 const OPTIONS: { id: OptionId; label: string; emoji: string }[] = [
   { id: "climate", label: "Climate Tech Breakthroughs", emoji: "🌱" },
@@ -29,17 +29,19 @@ export default function Index() {
   const [alreadyOpen, setAlreadyOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [poll, setPoll] = useState<PollInfo | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("zkvote-credential");
     if (saved) setCredential(JSON.parse(saved));
+    fetchPoll();
+    const id = setInterval(fetchPoll, 15000);
+    return () => clearInterval(id);
   }, []);
 
   const deadline = useMemo(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 7);
-    return d.toISOString();
-  }, []);
+    return poll ? new Date(poll.endsAt).toISOString() : new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString();
+  }, [poll]);
 
   async function ensureCredential() {
     if (credential) return credential;
