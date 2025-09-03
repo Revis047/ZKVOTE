@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { useEffect, useMemo, useState } from "react";
 import type { Credential, OptionId, Proof, PollInfo } from "@shared/api";
+import { fetchJson } from "@/lib/api";
 
 const OPTIONS: { id: OptionId; label: string; emoji: string }[] = [
   { id: "climate", label: "Climate Tech Breakthroughs", emoji: "🌱" },
