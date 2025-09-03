@@ -175,6 +175,25 @@ export default function Index() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={alreadyOpen} onOpenChange={setAlreadyOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Already voted</DialogTitle>
+            <DialogDescription>
+              Our ZK nullifier detected a previous ballot from your credential. Each person can vote once. You can still view the live results.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 flex items-center gap-3">
+            <Button asChild>
+              <a href="/results">View Live Results</a>
+            </Button>
+            <Button variant="secondary" onClick={() => setAlreadyOpen(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
