@@ -35,11 +35,11 @@ describe("mock ZK flow", () => {
   it("enforces one vote per nullifier", () => {
     const poll = getOrCreateCurrentPoll();
     const cred = issueCredential("NA");
-    const p = generateProof({ token: cred.token, option: "health" });
+    const p = generateProof({ token: cred.token, option: "health" }) as any;
     const v1 = verifyProof(p);
     expect(v1).toEqual({ valid: true });
-    recordVote(poll.id, p);
-    expect(() => recordVote(poll.id, p)).toThrow(/already used/);
+    recordVote(poll.id, { ...p, region: cred.region } as any);
+    expect(() => recordVote(poll.id, { ...p, region: cred.region } as any)).toThrow(/already used/);
   });
 
   it("tallies results correctly", () => {
@@ -48,8 +48,8 @@ describe("mock ZK flow", () => {
     const c2 = issueCredential("EU");
     const c3 = issueCredential("AF");
     [c1, c2, c3].forEach((c, i) => {
-      const proof = generateProof({ token: c.token, option: options[i] });
-      recordVote(poll.id, proof);
+      const proof = generateProof({ token: c.token, option: options[i] }) as any;
+      recordVote(poll.id, { ...proof, region: c.region } as any);
     });
     const results = getResults(poll.id);
     expect(results.totalVotes).toBe(3);
