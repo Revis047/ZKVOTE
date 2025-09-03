@@ -197,7 +197,7 @@ export default function Index() {
           </DialogHeader>
           <div className="mt-4 flex items-center gap-3">
             <Button asChild>
-              <a href="/results">View Live Results</a>
+              <a href="/results" onClick={(e)=>{e.preventDefault(); window.history.pushState({}, '', '/results'); window.dispatchEvent(new PopStateEvent('popstate'));}}>View Live Results</a>
             </Button>
             <Button variant="secondary" onClick={() => setAlreadyOpen(false)}>
               Close
