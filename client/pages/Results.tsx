@@ -4,6 +4,7 @@ import Footer from "@/components/layout/Footer";
 import Globe from "@/components/Globe";
 import Countdown from "@/components/Countdown";
 import type { Results } from "@shared/api";
+import RegionHeat from "@/components/RegionHeat";
 
 const END_DATE = (() => {
   const d = new Date();
