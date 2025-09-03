@@ -43,6 +43,12 @@ export default function Index() {
     return poll ? new Date(poll.endsAt).toISOString() : new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString();
   }, [poll]);
 
+  async function fetchPoll() {
+    const res = await fetch("/api/poll");
+    const p = (await res.json()) as PollInfo;
+    setPoll(p);
+  }
+
   async function ensureCredential() {
     if (credential) return credential;
     const res = await fetch("/api/credential", { method: "POST" });
@@ -61,14 +67,14 @@ export default function Index() {
       const proofRes = await fetch("/api/prove", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: cred.token, option: opt }),
+        body: JSON.stringify({ token: cred.token, option: opt, pollId: poll?.id }),
       });
       const proof = (await proofRes.json()) as Proof & { error?: string };
       if ((proof as any).error) throw new Error((proof as any).error);
       const voteRes = await fetch("/api/vote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(proof),
+        body: JSON.stringify({ ...proof, pollId: poll?.id }),
       });
       const v = await voteRes.json();
       if (v?.error) throw new Error(v.error);
