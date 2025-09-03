@@ -1,62 +1,154 @@
-import { DemoResponse } from "@shared/api";
-import { useEffect, useState } from "react";
+import Globe from "@/components/Globe";
+import Countdown from "@/components/Countdown";
+import VoteCard from "@/components/VoteCard";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useEffect, useMemo, useState } from "react";
+import type { Credential, OptionId, Proof } from "@shared/api";
+
+const OPTIONS: { id: OptionId; label: string; emoji: string }[] = [
+  { id: "climate", label: "Climate Tech Breakthroughs", emoji: "🌱" },
+  { id: "health", label: "Universal Health Access", emoji: "🧬" },
+  { id: "space", label: "Space Exploration", emoji: "🛰️" },
+  { id: "ai", label: "Ethical AI", emoji: "🧠" },
+  { id: "freedom", label: "Digital Freedom", emoji: "🌐" },
+];
 
 export default function Index() {
-  const [exampleFromServer, setExampleFromServer] = useState("");
-  // Fetch users on component mount
+  const [credential, setCredential] = useState<Credential | null>(null);
+  const [selected, setSelected] = useState<OptionId | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    fetchDemo();
+    const saved = localStorage.getItem("zkvote-credential");
+    if (saved) setCredential(JSON.parse(saved));
   }, []);
 
-  // Example of how to fetch data from the server (if needed)
-  const fetchDemo = async () => {
+  const deadline = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString();
+  }, []);
+
+  async function ensureCredential() {
+    if (credential) return credential;
+    const res = await fetch("/api/credential", { method: "POST" });
+    const cred = (await res.json()) as Credential;
+    setCredential(cred);
+    localStorage.setItem("zkvote-credential", JSON.stringify(cred));
+    return cred;
+  }
+
+  async function castVote(opt: OptionId) {
+    setSelected(opt);
+    setBusy(true);
+    setError(null);
     try {
-      const response = await fetch("/api/demo");
-      const data = (await response.json()) as DemoResponse;
-      setExampleFromServer(data.message);
-    } catch (error) {
-      console.error("Error fetching hello:", error);
+      const cred = await ensureCredential();
+      const proofRes = await fetch("/api/prove", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: cred.token, option: opt }),
+      });
+      const proof = (await proofRes.json()) as Proof & { error?: string };
+      if ((proof as any).error) throw new Error((proof as any).error);
+      const voteRes = await fetch("/api/vote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(proof),
+      });
+      const v = await voteRes.json();
+      if (v?.error) throw new Error(v.error);
+      setConfirmOpen(true);
+    } catch (e: any) {
+      setError(e?.message || "Something went wrong");
+    } finally {
+      setBusy(false);
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-      <div className="text-center">
-        {/* TODO: FUSION_GENERATION_APP_PLACEHOLDER replace everything here with the actual app! */}
-        <h1 className="text-2xl font-semibold text-slate-800 flex items-center justify-center gap-3">
-          <svg
-            className="animate-spin h-8 w-8 text-slate-400"
-            viewBox="0 0 50 50"
-          >
-            <circle
-              className="opacity-30"
-              cx="25"
-              cy="25"
-              r="20"
-              stroke="currentColor"
-              strokeWidth="5"
-              fill="none"
-            />
-            <circle
-              className="text-slate-600"
-              cx="25"
-              cy="25"
-              r="20"
-              stroke="currentColor"
-              strokeWidth="5"
-              fill="none"
-              strokeDasharray="100"
-              strokeDashoffset="75"
-            />
-          </svg>
-          Generating your app...
-        </h1>
-        <p className="mt-4 text-slate-600 max-w-md">
-          Watch the chat on the left for updates that might need your attention
-          to finish generating
-        </p>
-        <p className="mt-4 hidden max-w-md">{exampleFromServer}</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-background/60 text-foreground">
+      <Header />
+      <main className="relative">
+        <section className="relative flex min-h-[88vh] items-center overflow-hidden pt-20">
+          <Globe />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_10%,rgba(124,58,237,0.25)_0%,rgba(0,0,0,0)_60%)]" />
+          <div className="relative z-10 mx-auto max-w-7xl px-4">
+            <div className="max-w-3xl">
+              <h1 className="bg-gradient-to-r from-primary via-cyan-400 to-fuchsia-400 bg-clip-text text-5xl font-extrabold leading-tight text-transparent md:text-6xl">
+                ZKVote — The Future We Choose
+              </h1>
+              <p className="mt-4 text-lg text-muted-foreground">
+                One world. One vote. Total privacy. 🌍 Vote anonymously with zero-knowledge proofs on the Midnight Network.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center gap-4">
+                <Button onClick={ensureCredential} disabled={!!credential} className="shadow-[0_0_30px_theme(colors.cyan.400/.35)]">
+                  {credential ? "Credential Ready" : "Generate ZK Credential"}
+                </Button>
+                <Countdown target={deadline} />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="relative z-10 mx-auto max-w-7xl px-4 py-14">
+          <h2 className="text-2xl font-semibold text-muted-foreground">
+            Which global innovation should humanity prioritize next?
+          </h2>
+          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {OPTIONS.map((o) => (
+              <VoteCard
+                key={o.id}
+                id={o.id}
+                emoji={o.emoji}
+                label={o.label}
+                active={selected === o.id}
+                onClick={() => castVote(o.id)}
+              />
+            ))}
+          </div>
+          {error && (
+            <div role="alert" className="mt-6 rounded-md border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200">
+              {error}
+            </div>
+          )}
+          {busy && (
+            <div className="mt-6 text-sm text-muted-foreground">Encrypting your vote…</div>
+          )}
+        </section>
+      </main>
+
+      <Footer />
+
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Your vote has been encrypted</DialogTitle>
+            <DialogDescription>
+              Thank you for participating. Your eligibility was verified without revealing your identity. You can view live results.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 flex items-center gap-3">
+            <Button asChild>
+              <a href="/results">View Live Results</a>
+            </Button>
+            <Button variant="secondary" onClick={() => setConfirmOpen(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
