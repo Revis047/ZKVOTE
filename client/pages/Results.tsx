@@ -5,6 +5,7 @@ import Globe from "@/components/Globe";
 import Countdown from "@/components/Countdown";
 import type { Results, PollInfo } from "@shared/api";
 import RegionHeat from "@/components/RegionHeat";
+import { fetchJson } from "@/lib/api";
 
 
 function labelFor(k: string) {
@@ -27,17 +28,21 @@ function labelFor(k: string) {
 export default function ResultsPage() {
   const [data, setData] = useState<Results | null>(null);
   const [poll, setPoll] = useState<PollInfo | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
     async function load() {
-      const pres = await fetch("/api/poll");
-      const p = (await pres.json()) as PollInfo;
-      if (!mounted) return;
-      setPoll(p);
-      const r = await fetch(`/api/results?pollId=${encodeURIComponent(p.id)}`);
-      const json = (await r.json()) as Results;
-      if (mounted) setData(json);
+      try {
+        const p = await fetchJson<PollInfo>("/poll");
+        if (!mounted) return;
+        setPoll(p);
+        const json = await fetchJson<Results>(`/results?pollId=${encodeURIComponent(p.id)}`);
+        if (mounted) setData(json);
+        setError(null);
+      } catch (e) {
+        if (mounted) setError("Failed to load results. Retrying…");
+      }
     }
     load();
     const id = setInterval(load, 1000);
@@ -64,6 +69,11 @@ export default function ResultsPage() {
             </div>
 
             <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              {error && (
+                <div className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-200">
+                  {error}
+                </div>
+              )}
               {data ? (
                 Object.entries(data.tallies).map(([k, v]) => (
                   <div
