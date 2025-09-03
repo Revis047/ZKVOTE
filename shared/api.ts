@@ -10,3 +10,25 @@
 export interface DemoResponse {
   message: string;
 }
+
+// ZKVote shared types
+export type OptionId = "climate" | "health" | "space" | "ai" | "freedom";
+export type Region = "NA" | "SA" | "EU" | "AF" | "AS" | "OC";
+
+export interface Credential {
+  token: string;
+  region: Region;
+  issuedAt: number;
+}
+
+export interface Proof {
+  proof: string;
+  nullifier: string;
+  option: OptionId;
+}
+
+export interface Results {
+  tallies: Record<OptionId, number>;
+  regions: Record<Region, Record<OptionId, number>>;
+  totalVotes: number;
+}
