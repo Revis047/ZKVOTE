@@ -3,14 +3,9 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Globe from "@/components/Globe";
 import Countdown from "@/components/Countdown";
-import type { Results } from "@shared/api";
+import type { Results, PollInfo } from "@shared/api";
 import RegionHeat from "@/components/RegionHeat";
 
-const END_DATE = (() => {
-  const d = new Date();
-  d.setDate(d.getDate() + 7);
-  return d.toISOString();
-})();
 
 function labelFor(k: string) {
   switch (k) {
