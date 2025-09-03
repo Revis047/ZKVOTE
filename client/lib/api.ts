@@ -23,15 +23,17 @@ export async function fetchJson<T>(path: string, init?: RequestInit): Promise<T>
           const data = await res.json();
           msg = (data as any)?.error || "";
         } catch {}
-        lastErr = new Error(msg || `HTTP ${res.status}`);
-        // Try next base on any non-OK status
-        continue;
+        // Server responded; stop fallback and surface message
+        throw new Error(msg || `HTTP ${res.status}`);
       }
       return (await res.json()) as T;
     } catch (e: any) {
       lastErr = e;
-      // Try next base on network failures
-      continue;
+      // Only try next base on network errors
+      if (typeof e?.message === "string" && /failed to fetch|network/i.test(e.message)) {
+        continue;
+      }
+      break;
     }
   }
   throw lastErr ?? new Error("Network error");
