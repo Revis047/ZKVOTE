@@ -127,6 +127,25 @@ export default function Index() {
             <div className="mt-6 text-sm text-muted-foreground">Encrypting your vote…</div>
           )}
         </section>
+
+        <section id="learn" className="relative z-10 mx-auto max-w-7xl px-4 py-14">
+          <div className="grid gap-8 md:grid-cols-2">
+            <div className="rounded-2xl border bg-card/70 p-6 shadow-[0_0_20px_theme(colors.primary.DEFAULT/.15)]">
+              <h3 className="text-xl font-semibold">Privacy by Design</h3>
+              <p className="mt-2 text-muted-foreground">
+                Eligibility is verified using zero-knowledge proofs. Your identity and vote remain private, while the
+                system enforces one-vote-per-user with nullifiers.
+              </p>
+            </div>
+            <div className="rounded-2xl border bg-card/70 p-6 shadow-[0_0_20px_theme(colors.accent/.15)]">
+              <h3 className="text-xl font-semibold">Built for Midnight</h3>
+              <p className="mt-2 text-muted-foreground">
+                Powered by MidnightJS smart contracts and Compact circuits. This demo uses a mocked credential system to
+                simulate ZK flows without exposing identities.
+              </p>
+            </div>
+          </div>
+        </section>
       </main>
 
       <Footer />
