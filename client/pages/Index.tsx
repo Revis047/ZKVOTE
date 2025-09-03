@@ -45,8 +45,7 @@ export default function Index() {
   }, [poll]);
 
   async function fetchPoll() {
-    const res = await fetch("/api/poll");
-    const p = (await res.json()) as PollInfo;
+    const p = await fetchJson<PollInfo>("/poll");
     setPoll(p);
   }
 
