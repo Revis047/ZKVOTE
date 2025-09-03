@@ -11,6 +11,23 @@ const END_DATE = (() => {
   return d.toISOString();
 })();
 
+function labelFor(k: string) {
+  switch (k) {
+    case "climate":
+      return "Climate Tech Breakthroughs";
+    case "health":
+      return "Universal Health Access";
+    case "space":
+      return "Space Exploration";
+    case "ai":
+      return "Ethical AI";
+    case "freedom":
+      return "Digital Freedom";
+    default:
+      return k;
+  }
+}
+
 export default function ResultsPage() {
   const [data, setData] = useState<Results | null>(null);
 
