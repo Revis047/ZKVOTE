@@ -84,7 +84,7 @@ export default function Index() {
       setConfirmOpen(true);
     } catch (e: any) {
       const msg = String(e?.message || "Something went wrong");
-      if (/nullifier already used/i.test(msg)) {
+      if (/nullifier already used|already voted/i.test(msg)) {
         setAlreadyOpen(true);
         setError(null);
       } else {
