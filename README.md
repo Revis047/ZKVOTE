@@ -7,6 +7,7 @@ Privacy-by-design voting app for the Midnight Network. Voters prove eligibility 
 - ZK flow (mocked): credential -> proof -> vote -> live results, with regional tallies and a 5-day rotating poll
 
 ## Features
+
 - Anonymous, one-vote-per-user via cryptographic nullifiers
 - Stateless credential and proof generation (no server-side identity storage)
 - Rotating 5-day polls with countdown on the homepage
@@ -15,11 +16,13 @@ Privacy-by-design voting app for the Midnight Network. Voters prove eligibility 
 - Resilient API client with base fallbacks (local, Netlify function path, production)
 
 ## Tech Stack
+
 - Frontend: React 18, Vite 7, Tailwind CSS, Radix UI, shadcn/ui, React Router
 - Backend: Express 5, TypeScript, serverless-http (for Netlify)
 - Tooling: Vitest, Prettier, pnpm
 
 ## Project Structure
+
 ```
 .
 ├��� client/                # React app (pages, components, hooks, lib)
@@ -38,39 +41,49 @@ Privacy-by-design voting app for the Midnight Network. Voters prove eligibility 
 ```
 
 ## Getting Started (Local)
+
 Prerequisites:
+
 - Node.js 22+
 - pnpm (repo is configured for pnpm)
 
 Install dependencies:
+
 ```
 pnpm install
 ```
 
 Start the dev server (frontend + API via middleware):
+
 ```
 pnpm dev
 ```
+
 - App: http://localhost:8080
 - API base: http://localhost:8080/api
 
 Build for production:
+
 ```
 pnpm build
 ```
 
 Run the production server locally (serves dist/spa and API):
+
 ```
 pnpm start
 ```
+
 - App: http://localhost:3000
 - API base: http://localhost:3000/api
 
 Environment variables (optional):
+
 - `PING_MESSAGE`: overrides `/api/ping` response text
 - `PORT`: port for `pnpm start` (defaults to 3000)
 
 ## API Overview
+
 Base URL (local dev): `/api`
 
 - `GET /api/poll` — current poll id and end time
@@ -84,6 +97,7 @@ Base URL (local dev): `/api`
 - `GET /api/ping` — simple health check
 
 Typical flow (cURL):
+
 ```bash
 # 1) Get the current poll
 curl -s http://localhost:8080/api/poll
@@ -110,30 +124,36 @@ curl -i -s -X POST http://localhost:8080/api/vote -H 'content-type: application/
 ```
 
 Notes:
+
 - A second vote with the same nullifier returns `400 { "error": "Nullifier already used" }`.
 - The demo is cryptographically inspired but intentionally simplified and stateless for clarity.
 
 ## UI Usage
+
 - Click "Credential Ready" on the homepage to prepare a credential
 - Choose an option (Climate Tech, Health, Space, Ethical AI, Digital Freedom)
 - Submit your vote; if you attempt to vote twice, you’ll see an "Already voted" message
 - Visit `/results` to see tallies, regional breakdowns, and the total count
 
 ## Testing & Linting
+
 - Run tests: `pnpm test`
 - Format code: `pnpm format.fix`
 - Type-check: `pnpm typecheck`
 
 ## Deployment (Netlify)
+
 - `netlify.toml` configures build to `dist/spa`, functions in `netlify/functions`, API redirects (`/api/*` -> `/.netlify/functions/api/*`), and SPA fallback
 - Function handler mounts the Express app at `/.netlify/functions/api` so the same routes work in production
 - The frontend detects environment and tries bases in order (local `/api`, `/.netlify/functions/api`, production URL)
 
 ## Security & Privacy
+
 - This repository demonstrates ZK concepts with a mock, stateless flow. It is not a production ZK implementation
 - No secrets are stored client-side or committed; avoid adding secrets to the repo. Use environment variables if needed
 
 ## License
+
 Apache-2.0
 
 See LICENSE for full terms.
