@@ -7,7 +7,6 @@ import type { Results, PollInfo } from "@shared/api";
 import RegionHeat from "@/components/RegionHeat";
 import { fetchJson } from "@/lib/api";
 
-
 function labelFor(k: string) {
   switch (k) {
     case "climate":
@@ -37,7 +36,9 @@ export default function ResultsPage() {
         const p = await fetchJson<PollInfo>("/poll");
         if (!mounted) return;
         setPoll(p);
-        const json = await fetchJson<Results>(`/results?pollId=${encodeURIComponent(p.id)}`);
+        const json = await fetchJson<Results>(
+          `/results?pollId=${encodeURIComponent(p.id)}`,
+        );
         if (mounted) setData(json);
         setError(null);
       } catch (e) {
@@ -63,9 +64,13 @@ export default function ResultsPage() {
             <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
               <div>
                 <h1 className="text-4xl font-bold">Live Results</h1>
-                <p className="mt-2 text-muted-foreground">Encrypted, aggregated, and globally verifiable.</p>
+                <p className="mt-2 text-muted-foreground">
+                  Encrypted, aggregated, and globally verifiable.
+                </p>
               </div>
-              {poll && <Countdown target={new Date(poll.endsAt).toISOString()} />}
+              {poll && (
+                <Countdown target={new Date(poll.endsAt).toISOString()} />
+              )}
             </div>
 
             <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -80,7 +85,9 @@ export default function ResultsPage() {
                     key={k}
                     className="rounded-xl border bg-card/80 p-4 shadow-[0_0_20px_theme(colors.primary.DEFAULT/.15)]"
                   >
-                    <div className="text-sm text-muted-foreground">{labelFor(k)}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {labelFor(k)}
+                    </div>
                     <div className="mt-2 text-3xl font-extrabold">{v}</div>
                   </div>
                 ))
@@ -92,7 +99,8 @@ export default function ResultsPage() {
             {data && <RegionHeat data={data} />}
 
             <div className="mt-10 text-xs text-muted-foreground">
-              Regional breakdown updates every few seconds based on anonymous tallies.
+              Regional breakdown updates every few seconds based on anonymous
+              tallies.
             </div>
           </div>
         </section>

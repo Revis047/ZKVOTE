@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 
-export default function Countdown({ target }: { target: string | number | Date }) {
+export default function Countdown({
+  target,
+}: {
+  target: string | number | Date;
+}) {
   const targetMs = useMemo(() => new Date(target).getTime(), [target]);
   const [now, setNow] = useState(Date.now());
 

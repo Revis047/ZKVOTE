@@ -19,7 +19,9 @@ export default function VoteCard({ id, label, emoji, active, onClick }: Props) {
       className={cn(
         "group relative w-full overflow-hidden rounded-2xl border bg-gradient-to-b p-0.5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         "from-primary/40 to-primary/5",
-        active ? "shadow-[0_0_40px_theme(colors.primary.DEFAULT/.35)]" : "shadow-[0_0_20px_theme(colors.primary.DEFAULT/.15)]",
+        active
+          ? "shadow-[0_0_40px_theme(colors.primary.DEFAULT/.35)]"
+          : "shadow-[0_0_20px_theme(colors.primary.DEFAULT/.15)]",
       )}
     >
       <div className="relative h-full w-full rounded-[1rem] bg-card p-5 transition-colors group-hover:bg-card/95">
@@ -30,8 +32,12 @@ export default function VoteCard({ id, label, emoji, active, onClick }: Props) {
           </div>
           <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-400/80 shadow-[0_0_10px_theme(colors.emerald.400/.8)]" />
         </div>
-        <div className="mt-6 text-xl font-semibold text-foreground">{label}</div>
-        <div className="mt-2 text-sm text-muted-foreground">Tap to cast your encrypted vote</div>
+        <div className="mt-6 text-xl font-semibold text-foreground">
+          {label}
+        </div>
+        <div className="mt-2 text-sm text-muted-foreground">
+          Tap to cast your encrypted vote
+        </div>
       </div>
     </motion.button>
   );

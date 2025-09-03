@@ -11,7 +11,10 @@ export function apiBases() {
   return [local, netlify, prod];
 }
 
-export async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
+export async function fetchJson<T>(
+  path: string,
+  init?: RequestInit,
+): Promise<T> {
   const bases = apiBases();
   let lastErr: any;
   for (const base of bases) {
@@ -30,7 +33,10 @@ export async function fetchJson<T>(path: string, init?: RequestInit): Promise<T>
     } catch (e: any) {
       lastErr = e;
       // Only try next base on network errors
-      if (typeof e?.message === "string" && /failed to fetch|network/i.test(e.message)) {
+      if (
+        typeof e?.message === "string" &&
+        /failed to fetch|network/i.test(e.message)
+      ) {
         continue;
       }
       break;

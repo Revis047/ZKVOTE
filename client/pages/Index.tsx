@@ -41,7 +41,9 @@ export default function Index() {
   }, []);
 
   const deadline = useMemo(() => {
-    return poll ? new Date(poll.endsAt).toISOString() : new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString();
+    return poll
+      ? new Date(poll.endsAt).toISOString()
+      : new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString();
   }, [poll]);
 
   async function fetchPoll() {
@@ -63,23 +65,28 @@ export default function Index() {
     setError(null);
     try {
       const cred = await ensureCredential();
-      const proof = await fetchJson<Proof & { tokenHash?: string; error?: string }>(
-        "/prove",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token: cred.token, option: opt, pollId: poll?.id }),
-        },
-      );
+      const proof = await fetchJson<
+        Proof & { tokenHash?: string; error?: string }
+      >("/prove", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token: cred.token,
+          option: opt,
+          pollId: poll?.id,
+        }),
+      });
       if ((proof as any).error) throw new Error((proof as any).error);
-      const v = await fetchJson<{ ok?: boolean; error?: string }>(
-        "/vote",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...proof, pollId: poll?.id, tokenHash: (proof as any).tokenHash, region: (credential ?? { region: "NA" as any }).region }),
-        },
-      );
+      const v = await fetchJson<{ ok?: boolean; error?: string }>("/vote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...proof,
+          pollId: poll?.id,
+          tokenHash: (proof as any).tokenHash,
+          region: (credential ?? { region: "NA" as any }).region,
+        }),
+      });
       if (v?.error) throw new Error(v.error);
       setConfirmOpen(true);
     } catch (e: any) {
@@ -108,10 +115,15 @@ export default function Index() {
                 ZKVote — The Future We Choose
               </h1>
               <p className="mt-4 text-lg text-muted-foreground">
-                One world. One vote. Total privacy. 🌍 Vote anonymously with zero-knowledge proofs on the Midnight Network.
+                One world. One vote. Total privacy. 🌍 Vote anonymously with
+                zero-knowledge proofs on the Midnight Network.
               </p>
               <div className="mt-6 flex flex-wrap items-center gap-4">
-                <Button onClick={ensureCredential} disabled={!!credential} className="shadow-[0_0_30px_theme(colors.cyan.400/.35)]">
+                <Button
+                  onClick={ensureCredential}
+                  disabled={!!credential}
+                  className="shadow-[0_0_30px_theme(colors.cyan.400/.35)]"
+                >
                   {credential ? "Credential Ready" : "Generate ZK Credential"}
                 </Button>
                 <Countdown target={deadline} />
@@ -137,29 +149,39 @@ export default function Index() {
             ))}
           </div>
           {error && (
-            <div role="alert" className="mt-6 rounded-md border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200">
+            <div
+              role="alert"
+              className="mt-6 rounded-md border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200"
+            >
               {error}
             </div>
           )}
           {busy && (
-            <div className="mt-6 text-sm text-muted-foreground">Encrypting your vote…</div>
+            <div className="mt-6 text-sm text-muted-foreground">
+              Encrypting your vote…
+            </div>
           )}
         </section>
 
-        <section id="learn" className="relative z-10 mx-auto max-w-7xl px-4 py-14">
+        <section
+          id="learn"
+          className="relative z-10 mx-auto max-w-7xl px-4 py-14"
+        >
           <div className="grid gap-8 md:grid-cols-2">
             <div className="rounded-2xl border bg-card/70 p-6 shadow-[0_0_20px_theme(colors.primary.DEFAULT/.15)]">
               <h3 className="text-xl font-semibold">Privacy by Design</h3>
               <p className="mt-2 text-muted-foreground">
-                Eligibility is verified using zero-knowledge proofs. Your identity and vote remain private, while the
-                system enforces one-vote-per-user with nullifiers.
+                Eligibility is verified using zero-knowledge proofs. Your
+                identity and vote remain private, while the system enforces
+                one-vote-per-user with nullifiers.
               </p>
             </div>
             <div className="rounded-2xl border bg-card/70 p-6 shadow-[0_0_20px_theme(colors.accent/.15)]">
               <h3 className="text-xl font-semibold">Built for Midnight</h3>
               <p className="mt-2 text-muted-foreground">
-                Powered by MidnightJS smart contracts and Compact circuits. This demo uses a mocked credential system to
-                simulate ZK flows without exposing identities.
+                Powered by MidnightJS smart contracts and Compact circuits. This
+                demo uses a mocked credential system to simulate ZK flows
+                without exposing identities.
               </p>
             </div>
           </div>
@@ -173,12 +195,22 @@ export default function Index() {
           <DialogHeader>
             <DialogTitle>Your vote has been encrypted</DialogTitle>
             <DialogDescription>
-              Thank you for participating. Your eligibility was verified without revealing your identity. You can view live results.
+              Thank you for participating. Your eligibility was verified without
+              revealing your identity. You can view live results.
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4 flex items-center gap-3">
             <Button asChild>
-              <a href="/results" onClick={(e)=>{e.preventDefault(); window.history.pushState({}, '', '/results'); window.dispatchEvent(new PopStateEvent('popstate'));}}>View Live Results</a>
+              <a
+                href="/results"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.history.pushState({}, "", "/results");
+                  window.dispatchEvent(new PopStateEvent("popstate"));
+                }}
+              >
+                View Live Results
+              </a>
             </Button>
             <Button variant="secondary" onClick={() => setConfirmOpen(false)}>
               Close
@@ -192,12 +224,22 @@ export default function Index() {
           <DialogHeader>
             <DialogTitle>Already voted</DialogTitle>
             <DialogDescription>
-              Our ZK nullifier detected a previous ballot from your credential. Each person can vote once. You can still view the live results.
+              Our ZK nullifier detected a previous ballot from your credential.
+              Each person can vote once. You can still view the live results.
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4 flex items-center gap-3">
             <Button asChild>
-              <a href="/results" onClick={(e)=>{e.preventDefault(); window.history.pushState({}, '', '/results'); window.dispatchEvent(new PopStateEvent('popstate'));}}>View Live Results</a>
+              <a
+                href="/results"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.history.pushState({}, "", "/results");
+                  window.dispatchEvent(new PopStateEvent("popstate"));
+                }}
+              >
+                View Live Results
+              </a>
             </Button>
             <Button variant="secondary" onClick={() => setAlreadyOpen(false)}>
               Close

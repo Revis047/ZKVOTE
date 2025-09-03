@@ -14,7 +14,9 @@ export default function Header() {
             to="/"
             className={
               "rounded-md px-3 py-2 text-sm " +
-              (pathname === "/" ? "text-primary" : "text-muted-foreground hover:text-foreground")
+              (pathname === "/"
+                ? "text-primary"
+                : "text-muted-foreground hover:text-foreground")
             }
           >
             Vote
@@ -31,7 +33,9 @@ export default function Header() {
             Results
           </Link>
           <Button size="sm" variant="secondary" asChild>
-            <Link to="/about" aria-label="Learn about privacy">About</Link>
+            <Link to="/about" aria-label="Learn about privacy">
+              About
+            </Link>
           </Button>
         </nav>
       </div>

@@ -27,8 +27,13 @@ export const postCredential: RequestHandler = (req, res) => {
 };
 
 export const postProve: RequestHandler = (req, res) => {
-  const { token, option } = req.body as { token?: string; option?: OptionId; pollId?: string };
-  if (!token || !option) return res.status(400).json({ error: "token and option are required" });
+  const { token, option } = req.body as {
+    token?: string;
+    option?: OptionId;
+    pollId?: string;
+  };
+  if (!token || !option)
+    return res.status(400).json({ error: "token and option are required" });
   try {
     const proof = generateProof({ token, option, pollId: req.body?.pollId });
     res.status(200).json(proof);
@@ -46,7 +51,10 @@ export const postVote: RequestHandler = (req, res) => {
     tokenHash?: string;
     region?: Region;
   };
-  if (!proof || !nullifier || !option) return res.status(400).json({ error: "proof, nullifier, option are required" });
+  if (!proof || !nullifier || !option)
+    return res
+      .status(400)
+      .json({ error: "proof, nullifier, option are required" });
   const status = verifyProof({ proof, nullifier, option, tokenHash });
   if (!status.valid) return res.status(400).json({ error: status.reason });
   try {

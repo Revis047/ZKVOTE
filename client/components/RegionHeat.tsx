@@ -16,7 +16,10 @@ const regions: { id: keyof Results["regions"]; name: string }[] = [
 
 export default function RegionHeat({ data }: { data: Results }) {
   const totals = Object.fromEntries(
-    regions.map((r) => [r.id, Object.values(data.regions[r.id]).reduce((a, b) => a + b, 0)]),
+    regions.map((r) => [
+      r.id,
+      Object.values(data.regions[r.id]).reduce((a, b) => a + b, 0),
+    ]),
   ) as Record<string, number>;
   const max = Math.max(1, ...Object.values(totals));
 

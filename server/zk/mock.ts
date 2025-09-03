@@ -1,12 +1,6 @@
 import crypto from "crypto";
 
-export type Region =
-  | "NA"
-  | "SA"
-  | "EU"
-  | "AF"
-  | "AS"
-  | "OC";
+export type Region = "NA" | "SA" | "EU" | "AF" | "AS" | "OC";
 
 export type OptionId = "climate" | "health" | "space" | "ai" | "freedom";
 
@@ -43,16 +37,25 @@ const regionList: Region[] = ["NA", "SA", "EU", "AF", "AS", "OC"];
 // In-memory stores (ephemeral, for demo)
 const pollNullifiers: Map<string, Set<string>> = new Map();
 const pollTallies: Map<string, Record<OptionId, number>> = new Map();
-const pollRegionTallies: Map<string, Record<Region, Record<OptionId, number>>> = new Map();
+const pollRegionTallies: Map<
+  string,
+  Record<Region, Record<OptionId, number>>
+> = new Map();
 let currentPoll: { id: string; endsAt: number } | null = null;
 const POLL_DURATION_MS = 5 * 24 * 60 * 60 * 1000;
 
 function emptyTallies() {
-  return { climate: 0, health: 0, space: 0, ai: 0, freedom: 0 } as Record<OptionId, number>;
+  return { climate: 0, health: 0, space: 0, ai: 0, freedom: 0 } as Record<
+    OptionId,
+    number
+  >;
 }
 function emptyRegionTallies() {
   return Object.fromEntries(
-    regionList.map((r) => [r, { climate: 0, health: 0, space: 0, ai: 0, freedom: 0 }]),
+    regionList.map((r) => [
+      r,
+      { climate: 0, health: 0, space: 0, ai: 0, freedom: 0 },
+    ]),
   ) as Record<Region, Record<OptionId, number>>;
 }
 
@@ -101,12 +104,17 @@ export function generateProof(req: ProofRequest): Proof {
   const tHash = tokenHash(req.token);
   const material = `${tHash}:${req.option}:${nullifier}`;
   const proof = crypto.createHash("sha512").update(material).digest("hex");
-  return { proof, nullifier, option: req.option, tokenHash: tHash } as Proof & { tokenHash: string };
+  return { proof, nullifier, option: req.option, tokenHash: tHash } as Proof & {
+    tokenHash: string;
+  };
 }
 
-export function verifyProof(p: Proof & { tokenHash?: string }): { valid: true } | { valid: false; reason: string } {
+export function verifyProof(
+  p: Proof & { tokenHash?: string },
+): { valid: true } | { valid: false; reason: string } {
   // recompute from provided tokenHash and nullifier
-  if (!p || !(p as any).tokenHash) return { valid: false, reason: "Missing token hash" };
+  if (!p || !(p as any).tokenHash)
+    return { valid: false, reason: "Missing token hash" };
   const expected = crypto
     .createHash("sha512")
     .update(`${(p as any).tokenHash}:${p.option}:${p.nullifier}`)
