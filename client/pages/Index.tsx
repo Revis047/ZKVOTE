@@ -72,7 +72,13 @@ export default function Index() {
       if (v?.error) throw new Error(v.error);
       setConfirmOpen(true);
     } catch (e: any) {
-      setError(e?.message || "Something went wrong");
+      const msg = String(e?.message || "Something went wrong");
+      if (/nullifier already used/i.test(msg)) {
+        setAlreadyOpen(true);
+        setError(null);
+      } else {
+        setError(msg);
+      }
     } finally {
       setBusy(false);
     }
