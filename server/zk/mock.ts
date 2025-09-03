@@ -42,17 +42,37 @@ const regionList: Region[] = ["NA", "SA", "EU", "AF", "AS", "OC"];
 
 // In-memory stores (ephemeral, for demo)
 const issued: Map<string, Credential> = new Map();
-const usedNullifiers: Set<string> = new Set();
-const tallies: Record<OptionId, number> = {
-  climate: 0,
-  health: 0,
-  space: 0,
-  ai: 0,
-  freedom: 0,
-};
-const regionTallies: Record<Region, Record<OptionId, number>> = Object.fromEntries(
-  regionList.map((r) => [r, { climate: 0, health: 0, space: 0, ai: 0, freedom: 0 }]),
-) as Record<Region, Record<OptionId, number>>;
+const pollNullifiers: Map<string, Set<string>> = new Map();
+const pollTallies: Map<string, Record<OptionId, number>> = new Map();
+const pollRegionTallies: Map<string, Record<Region, Record<OptionId, number>>> = new Map();
+let currentPoll: { id: string; endsAt: number } | null = null;
+const POLL_DURATION_MS = 5 * 24 * 60 * 60 * 1000;
+
+function emptyTallies() {
+  return { climate: 0, health: 0, space: 0, ai: 0, freedom: 0 } as Record<OptionId, number>;
+}
+function emptyRegionTallies() {
+  return Object.fromEntries(
+    regionList.map((r) => [r, { climate: 0, health: 0, space: 0, ai: 0, freedom: 0 }]),
+  ) as Record<Region, Record<OptionId, number>>;
+}
+
+function newPoll() {
+  const id = `poll-${Date.now().toString(36)}-${randHex(3)}`;
+  const endsAt = Date.now() + POLL_DURATION_MS;
+  pollNullifiers.set(id, new Set());
+  pollTallies.set(id, emptyTallies());
+  pollRegionTallies.set(id, emptyRegionTallies());
+  return { id, endsAt };
+}
+
+export function getOrCreateCurrentPoll() {
+  if (!currentPoll) currentPoll = newPoll();
+  if (Date.now() > currentPoll.endsAt) {
+    currentPoll = newPoll();
+  }
+  return currentPoll;
+}
 
 function randHex(bytes = 32) {
   return crypto.randomBytes(bytes).toString("hex");
@@ -96,31 +116,42 @@ export function verifyProof(p: Proof): { valid: true } | { valid: false; reason:
   return { valid: true };
 }
 
-export function recordVote(p: Proof) {
-  if (usedNullifiers.has(p.nullifier)) {
+export function recordVote(pollId: string, p: Proof) {
+  const poll = pollTallies.get(pollId);
+  const regions = pollRegionTallies.get(pollId);
+  const nulls = pollNullifiers.get(pollId);
+  if (!poll || !regions || !nulls) throw new Error("Unknown poll");
+  if (nulls.has(p.nullifier)) {
     throw new Error("Nullifier already used");
   }
   const holder = [...issued.values()].find((c) => nullifierFromToken(c.token) === p.nullifier);
   if (!holder) throw new Error("No credential for nullifier");
-  usedNullifiers.add(p.nullifier);
-  tallies[p.option] += 1;
-  regionTallies[holder.region][p.option] += 1;
+  nulls.add(p.nullifier);
+  poll[p.option] += 1;
+  regions[holder.region][p.option] += 1;
 }
 
-export function getResults(): Results {
-  const totalVotes = Object.values(tallies).reduce((a, b) => a + b, 0);
+export function getResults(pollId?: string): Results {
+  const id = pollId ?? getOrCreateCurrentPoll().id;
+  const poll = pollTallies.get(id);
+  const regions = pollRegionTallies.get(id);
+  if (!poll || !regions) throw new Error("Unknown poll");
+  const totalVotes = Object.values(poll).reduce((a, b) => a + b, 0);
   return {
-    tallies: { ...tallies },
-    regions: JSON.parse(JSON.stringify(regionTallies)) as Results["regions"],
+    tallies: { ...(poll as Record<OptionId, number>) },
+    regions: JSON.parse(JSON.stringify(regions)) as Results["regions"],
     totalVotes,
   };
 }
 
 export function resetAll() {
   issued.clear();
-  usedNullifiers.clear();
-  (Object.keys(tallies) as OptionId[]).forEach((k) => (tallies[k] = 0));
-  regionList.forEach((r) => {
-    (Object.keys(regionTallies[r]) as OptionId[]).forEach((k) => (regionTallies[r][k] = 0));
-  });
+  pollNullifiers.clear();
+  pollTallies.clear();
+  pollRegionTallies.clear();
+  currentPoll = null;
+}
+
+export function getCurrentPollInfo() {
+  return getOrCreateCurrentPoll();
 }
