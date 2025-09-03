@@ -52,7 +52,7 @@ export default function ResultsPage() {
                     key={k}
                     className="rounded-xl border bg-card/80 p-4 shadow-[0_0_20px_theme(colors.primary.DEFAULT/.15)]"
                   >
-                    <div className="text-sm capitalize text-muted-foreground">{k.replace(/.*/, (s)=>s)}</div>
+                    <div className="text-sm text-muted-foreground">{labelFor(k)}</div>
                     <div className="mt-2 text-3xl font-extrabold">{v}</div>
                   </div>
                 ))
