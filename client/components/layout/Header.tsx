@@ -7,7 +7,6 @@ export default function Header() {
     <header className="fixed inset-x-0 top-0 z-40 border-b border-white/5 bg-background/60 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2 font-semibold">
-          <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-primary to-fuchsia-500 shadow-[0_0_20px_theme(colors.fuchsia.500/.4)]" />
           <span>ZKVote</span>
         </Link>
         <nav className="flex items-center gap-2">
