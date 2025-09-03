@@ -63,19 +63,23 @@ export default function Index() {
     setError(null);
     try {
       const cred = await ensureCredential();
-      const proofRes = await fetch("/api/prove", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: cred.token, option: opt, pollId: poll?.id }),
-      });
-      const proof = (await proofRes.json()) as (Proof & { tokenHash?: string; error?: string });
+      const proof = await fetchJson<Proof & { tokenHash?: string; error?: string }>(
+        "/prove",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: cred.token, option: opt, pollId: poll?.id }),
+        },
+      );
       if ((proof as any).error) throw new Error((proof as any).error);
-      const voteRes = await fetch("/api/vote", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...proof, pollId: poll?.id, tokenHash: (proof as any).tokenHash, region: (credential ?? { region: "NA" as any }).region }),
-      });
-      const v = await voteRes.json();
+      const v = await fetchJson<{ ok?: boolean; error?: string }>(
+        "/vote",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...proof, pollId: poll?.id, tokenHash: (proof as any).tokenHash, region: (credential ?? { region: "NA" as any }).region }),
+        },
+      );
       if (v?.error) throw new Error(v.error);
       setConfirmOpen(true);
     } catch (e: any) {
