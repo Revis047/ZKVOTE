@@ -21,6 +21,7 @@ export function createServer() {
   app.get("/api/demo", handleDemo);
 
   // ZK mock endpoints
+  app.get("/api/poll", getPoll);
   app.post("/api/credential", postCredential);
   app.post("/api/prove", postProve);
   app.post("/api/vote", postVote);
