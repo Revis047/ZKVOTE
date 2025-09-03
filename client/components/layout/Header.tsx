@@ -32,7 +32,7 @@ export default function Header() {
             Results
           </Link>
           <Button size="sm" variant="secondary" asChild>
-            <a href="#learn" aria-label="Learn about privacy">About</a>
+            <Link to="/about" aria-label="Learn about privacy">About</Link>
           </Button>
         </nav>
       </div>
