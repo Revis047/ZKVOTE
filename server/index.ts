@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
+import { getVotes, postCredential, postProve, postVote } from "./routes/zk";
 
 export function createServer() {
   const app = express();
@@ -18,6 +19,12 @@ export function createServer() {
   });
 
   app.get("/api/demo", handleDemo);
+
+  // ZK mock endpoints
+  app.post("/api/credential", postCredential);
+  app.post("/api/prove", postProve);
+  app.post("/api/vote", postVote);
+  app.get("/api/results", getVotes);
 
   return app;
 }
