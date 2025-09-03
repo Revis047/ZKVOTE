@@ -38,13 +38,21 @@ export const postProve: RequestHandler = (req, res) => {
 };
 
 export const postVote: RequestHandler = (req, res) => {
-  const { proof, nullifier, option, pollId } = req.body as { proof?: string; nullifier?: string; option?: OptionId; pollId?: string };
+  const { proof, nullifier, option, pollId, tokenHash, region } = req.body as {
+    proof?: string;
+    nullifier?: string;
+    option?: OptionId;
+    pollId?: string;
+    tokenHash?: string;
+    region?: Region;
+  };
   if (!proof || !nullifier || !option) return res.status(400).json({ error: "proof, nullifier, option are required" });
-  const status = verifyProof({ proof, nullifier, option });
+  const status = verifyProof({ proof, nullifier, option, tokenHash });
   if (!status.valid) return res.status(400).json({ error: status.reason });
   try {
     const poll = pollId ?? getCurrentPollInfo().id;
-    recordVote(poll, { proof, nullifier, option });
+    if (!region) return res.status(400).json({ error: "region is required" });
+    recordVote(poll, { proof, nullifier, option, tokenHash, region } as any);
     res.status(200).json({ ok: true });
   } catch (e: any) {
     res.status(400).json({ error: e?.message ?? "Vote failed" });
