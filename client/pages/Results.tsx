@@ -26,16 +26,21 @@ function labelFor(k: string) {
 
 export default function ResultsPage() {
   const [data, setData] = useState<Results | null>(null);
+  const [poll, setPoll] = useState<PollInfo | null>(null);
 
   useEffect(() => {
     let mounted = true;
-    async function fetchData() {
-      const res = await fetch("/api/results");
-      const json = (await res.json()) as Results;
+    async function load() {
+      const pres = await fetch("/api/poll");
+      const p = (await pres.json()) as PollInfo;
+      if (!mounted) return;
+      setPoll(p);
+      const r = await fetch(`/api/results?pollId=${encodeURIComponent(p.id)}`);
+      const json = (await r.json()) as Results;
       if (mounted) setData(json);
     }
-    fetchData();
-    const id = setInterval(fetchData, 1000);
+    load();
+    const id = setInterval(load, 1000);
     return () => {
       mounted = false;
       clearInterval(id);
@@ -55,7 +60,7 @@ export default function ResultsPage() {
                 <h1 className="text-4xl font-bold">Live Results</h1>
                 <p className="mt-2 text-muted-foreground">Encrypted, aggregated, and globally verifiable.</p>
               </div>
-              <Countdown target={END_DATE} />
+              {poll && <Countdown target={new Date(poll.endsAt).toISOString()} />}
             </div>
 
             <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
