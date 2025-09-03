@@ -6,6 +6,7 @@ import {
   recordVote,
   getResults,
   resetAll,
+  getOrCreateCurrentPoll,
 } from "./mock";
 
 import type { OptionId } from "./mock";
