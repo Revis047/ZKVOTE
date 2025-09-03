@@ -134,4 +134,6 @@ Notes:
 - No secrets are stored client-side or committed; avoid adding secrets to the repo. Use environment variables if needed
 
 ## License
-MIT
+Apache-2.0
+
+See LICENSE for full terms.
